@@ -1,0 +1,178 @@
+---
+title: "Salary and Working Hours"
+author: "Aleksandra Villepique"
+date: "February 16, 2016"
+output: html_document
+---
+
+Yesterday I saw on the Facebook interesting bar graph that illustrated averaged annual working hours across countries included in OECD data collection. 
+What intrigued me was that countries I knew to be poorer had more working hours than the richer countries. 
+
+Just to satisfy my curiosity, I decided to head to OECD site, collect some data and do the analysis myself, just to see is there a correlation between working hours and income.  
+
+I'm not really experienced with the OECD database so I could not find there median income per country, so I decided to use minimum income per country because average income is skewed towards larger values due to the huge income gap. 
+
+
+```{r}
+data=read.csv("RMW_16022016200632658.csv")
+#looking at the data:
+head(data)
+summary(data)
+tail(data)
+str(data)
+
+#getting data from 2010- present
+test <- subset(data, data$TIME >= 2010)
+myVar<-c("COUNTRY", "Country", "TIME", "Time", "Value")
+minSalary <- test[myVar]
+```
+
+
+Uploading working hours:
+
+```{r}
+data=read.csv("ANHRS_16022016200952408.csv")
+#looking at the data:
+head(data)
+summary(data)
+tail(data)
+str(data)
+
+#getting data from 2010- present
+test <- subset(data, data$TIME >= 2010)
+myVar<-c("COUNTRY", "Country", "TIME", "Time", "Value")
+workHours <- test[myVar]
+```
+
+I picked only years 2010, 2011, 2012, 2013, and 2014. This period is similar, shows certain recovery in the economy. Yeah, I know we're now in the front another bubble, but that is not subject to this little analysis. 
+
+Another reason why I decided to pick several years is to make sure that results from one year are not some kind of fluke. 
+
+So here are the results for 2010:
+
+```{r}
+MS2010<-subset(minSalary, minSalary$TIME==2010)
+```
+
+Which looks like:
+
+```{r, echo=FALSE}
+plot(MS2010$COUNTRY, MS2010$Value, xlab="Countries", ylab="Min. Income")
+```
+
+```{r}
+WH2010<-subset(workHours, workHours$TIME==2010)
+```
+
+Which looks like:
+
+```{r, echo=FALSE}
+plot(WH2010$COUNTRY, WH2010$Value, xlab="Countries", ylab="Work Hours")
+```
+
+But now, how do they correlate?
+
+The data sets were not equal, one had more countries than other, so I had to tweak the data frames before merging them. This gave me 25 different countries. 
+
+
+```{r}
+test<-unique(MS2010$COUNTRY)
+test2<-subset(WH2010, WH2010$COUNTRY %in% test)
+test3 <- merge(test2, MS2010, by.x="COUNTRY", by.y="COUNTRY")
+d2010<- subset(test3, test3$Value.y >=20)
+```
+
+And graph with linear fit is:
+
+Which looks like:
+
+```{r, echo=FALSE}
+plot(d2010$Value.x, d2010$Value.y, xlab="Working Hours", ylab="Min. Wage")
+abline(lm(d2010$Value.y~d2010$Value.x))
+```
+
+And statistical values of linear regression are:
+
+```{r}
+d2010.lm<-lm(d2010$Value.y~d2010$Value.x)
+summary(d2010.lm)$r.squared
+summary(d2010.lm)
+cor(d2010$Value.y,d2010$Value.x)
+```
+
+I was quite pleased to see that correlation is negative, as I suspected.  The value of -0.73 shows quite good a negative relation between variables. 
+
+ Meaning, more work does not bring more money to a human. How much money individual earns depends on other factors that form labor situation in the country. The factors I did not consider in this little analysis. 
+ 
+R-squared value is also quite decent; 0.53 shows that linear fit is a good approximation. And of course, the p-value is 2.2 e-16, adding another confirmation of the significance of this result. 
+
+The rest of the analyzed years gave similar results.
+
+2011:
+
+```{r}
+WH2011<-subset(workHours, workHours$TIME==2011)
+MS2011<-subset(minSalary, minSalary$TIME==2011)
+
+test<-unique(MS2011$COUNTRY)
+test2<-subset(WH2011, WH2011$COUNTRY %in% test)
+test3 <- merge(test2, MS2011, by.x="COUNTRY", by.y="COUNTRY")
+d2011<- subset(test3, test3$Value.y >=20)
+
+d2011.lm<-lm(d2011$Value.y~d2011$Value.x)
+summary(d2011.lm)$r.squared
+summary(d2011.lm)
+cor(d2011$Value.y,d2011$Value.x)
+```
+
+2012:
+
+```{r}
+MS2012<-subset(minSalary, minSalary$TIME==2012)
+WH2012<-subset(workHours, workHours$TIME==2012)
+
+test<-unique(MS2012$COUNTRY)
+test2<-subset(WH2012, WH2012$COUNTRY %in% test)
+test3 <- merge(test2, MS2012, by.x="COUNTRY", by.y="COUNTRY")
+d2012<- subset(test3, test3$Value.y >=20)
+d2012.lm<-lm(d2012$Value.y~d2012$Value.x)
+summary(d2012.lm)$r.squared
+summary(d2012.lm)
+cor(d2012$Value.y,d2012$Value.x)
+```
+
+2013:
+
+```{r}
+MS2013<-subset(minSalary, minSalary$TIME==2013)
+WH2013<-subset(workHours, workHours$TIME==2013)
+
+test<-unique(MS2013$COUNTRY)
+test2<-subset(WH2013, WH2013$COUNTRY %in% test)
+test3 <- merge(test2, MS2013, by.x="COUNTRY", by.y="COUNTRY")
+d2013<- subset(test3, test3$Value.y >=20)
+
+d2013.lm<-lm(d2013$Value.y~d2013$Value.x)
+summary(d2013.lm)$r.squared
+summary(d2013.lm)
+cor(d2013$Value.y,d2013$Value.x)
+```
+
+and 2014:
+
+```{r}
+MS2014<-subset(minSalary, minSalary$TIME==2014)
+WH2014<-subset(workHours, workHours$TIME==2014)
+
+test<-unique(MS2014$COUNTRY)
+test2<-subset(WH2014, WH2014$COUNTRY %in% test)
+test3 <- merge(test2, MS2014, by.x="COUNTRY", by.y="COUNTRY")
+d2014<- subset(test3, test3$Value.y >=20)
+d2014.lm<-lm(d2014$Value.y~d2014$Value.x)
+summary(d2014.lm)$r.squared
+summary(d2014.lm)
+cor(d2014$Value.y,d2014$Value.x)
+```
+
+All of them had similar values for correlation, a coefficient of determination and p-value. 
+I do not know much about the economy to conclude why there is this sad result. The only thing I can see is that it does not matter how much someone works, but in which country they live. 
